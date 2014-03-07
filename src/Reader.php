@@ -35,6 +35,7 @@ namespace League\Csv;
 use SplFileObject;
 use SplTempFileObject;
 use InvalidArgumentException;
+use DomainException;
 use CallbackFilterIterator;
 use League\Csv\Iterator\MapIterator;
 use League\Csv\Iterator\IteratorQuery;
@@ -88,6 +89,27 @@ class Reader extends AbstractCsv
         });
 
         return $this->execute($iterator, $callable);
+    }
+
+    /**
+     * Return a Filtered Generator
+     *
+     * @param callable $callable a callable function to be applied to each Iterator item
+     *
+     * @return \Generator
+     */
+    public function yieldAll(callable $callable = null)
+    {
+        if (!version_compare(phpversion(), '5.5.0', '>=') && !defined('HHVM_VERSION')) {
+            throw new DomainException(__METHOD__.' works only with a PHP version that supports Generators');
+        }
+
+        foreach ($this->query($callable) as $key => $value) {
+            $stmt = (yield $key => $value);
+            if (! $stmt) {
+                return;
+            }
+        }
     }
 
     /**
