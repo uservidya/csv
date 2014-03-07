@@ -38,6 +38,18 @@ class ReaderTest extends PHPUnit_Framework_TestCase
         $this->assertSame(array_map($func, $this->expected), $this->csv->fetchAll($func));
     }
 
+    /**
+     * @requires PHP 5.5
+     */
+    public function testyieldAll()
+    {
+        $res = $this->csv->yieldAll();
+        $this->assertInstanceOf('\Generator', $res);
+        foreach ($res as $key => $value) {
+            $this->assertSame($this->expected[$key], $value);
+        }
+    }
+
     public function testFetchAssoc()
     {
         $keys = ['firstname', 'lastname', 'email'];
