@@ -1,0 +1,222 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+            <link rel="icon" type="image/x-icon" href="/themes/thephpleague/thephpleague.github.com/img/favicon.ico" />
+                <link rel="apple-touch-icon-precomposed" href="/themes/thephpleague/thephpleague.github.com/img/apple-touch-icon-precomposed.png">
+                <title>Loading - CSV</title>
+                <meta name="description" content="Working with CSV can often be much more difficult than you expect, with different types of delimiter and complicated structures. This makes it easy to read and write almost anything.">
+                <link rel="stylesheet" href="/themes/thephpleague/thephpleague.github.com/css/all.css">
+    </head>
+<body>
+
+<section class="all_packages">
+    <a href="http://thephpleague.com/">
+        <img src="/themes/thephpleague/thephpleague.github.com/img/loep_logo.png" width="195" height="200" alt="The League of Extraordinary Packages">
+    </a>
+    <h2>Our Packages:</h2>
+    <ul>
+    </ul>
+</section>
+
+<header>
+    <a class="logo" href="/">
+                <span class="name">CSV</span>
+        <span class="tagline">CSV data manipulation made easy in PHP.</span>
+    </a>
+    <a href="http://thephpleague.com/" class="league">
+        Presented by The League of Extraordinary Packages
+    </a>
+</header>
+
+<input type="checkbox" id="menu">
+<label for="menu" onclick>
+    <div class="closed">&#9776; Menu</div>
+    <div class="open">&#9776; Hide Menu</div>
+</label>
+
+<main>
+    <menu>
+                    <h2>Getting Started</h2>
+            <ul>
+                                    <li >
+                        <a href="/">Introduction</a>
+                    </li>
+                                    <li >
+                        <a href="/examples/">Examples</a>
+                    </li>
+                                    <li >
+                        <a href="/installation/">Installation</a>
+                    </li>
+                            </ul>
+                    <h2>The API</h2>
+            <ul>
+                                    <li class="selected">
+                        <a href="/overview/">Overview</a>
+                    </li>
+                                    <li >
+                        <a href="/outputting/">Outputting</a>
+                    </li>
+                                    <li >
+                        <a href="/reading/">Extracting</a>
+                    </li>
+                                    <li >
+                        <a href="/inserting/">Inserting</a>
+                    </li>
+                            </ul>
+            </menu>
+    <article>
+        <h1>Overview</h1>
+
+<div class="message-warning"><strong>Warning:</strong>If you are on a Mac OS X Server, add the following lines before using the library to help <a href="http://php.net/manual/en/function.fgetcsv.php#refsect1-function.fgetcsv-returnvalues">PHP detect line ending in Mac OS X</a>.
+<pre><code class="language-php">if (! ini_get(&quot;auto_detect_line_endings&quot;)) {
+    ini_set(&quot;auto_detect_line_endings&quot;, true);
+}
+</code></pre>
+</div>
+
+<p class="message-info">If you have your LC_CTYPE set to a locale that's using UTF-8 and you try to parse a file that's not in UTF-8, PHP will cut your fields the moment it encounters a byte it can't understand (i.e. any outside of ASCII that doesn't happen to be part of a UTF-8 character which it likely isn't). <a href="https://gist.github.com/pilif/9137146">This gist will show you a possible solution</a> to this problem by using <a href="http://www.php.net/manual/en/stream.filters.php">PHP stream filter</a>. This tip is from <a href="https://github.com/pilif">Philip Hofstetter</a></p>
+
+<p>The library is composed of two main classes:</p>
+
+<ul>
+<li><code>League\Csv\Reader</code> to extract and filter data from a CSV</li>
+<li><code>League\Csv\Writer</code> to insert new data into a CSV</li>
+</ul>
+
+<p>Both classes share methods to instantiate, format and output the CSV.</p>
+
+<h2>Class Instantiation</h2>
+
+<p>There's several ways to instantiate these classes:</p>
+
+<pre><code class="language-php">use League\Csv\Reader;
+use League\Csv\Writer;
+
+$reader = new Reader('/path/to/your/csv/file.csv');
+$reader = new Reader(new SpliFileInfo('/path/to/your/csv/file.csv'), 'rt');
+$reader = Reader::createFromString('john,doe,john.doe@example.com');
+
+//or 
+
+$writer = new Writer('/path/to/your/csv/file.csv', 'ab+');
+$writer = new Writer(new SpliFileObject('/path/to/your/csv/file.csv'));
+$writer = Writer::createFromString('john,doe,john.doe@example.com');
+</code></pre>
+
+<p>Both classes constructors take one optional parameter <code>$open_mode</code> representing
+the file open mode used by the PHP fopen function.</p>
+
+<p>The <code>$open_mode</code> parameter is taken into account if you instantiate your object with:</p>
+
+<ul>
+<li>a <code>SplFileInfo</code></li>
+<li>a string path</li>
+</ul>
+
+<p>The <code>$open_mode</code> parameter is ignore if you instantiate your object with:</p>
+
+<ul>
+<li>a <code>SplFileObject</code></li>
+<li>a <code>SplTempFileObject</code></li>
+</ul>
+
+<p>When not explicitly set:</p>
+
+<ul>
+<li>The <code>League\Csv\Writer</code> <code>$open_mode</code> default value is <code>w</code></li>
+<li>The <code>League\Csv\Reader</code> <code>$open_mode</code> default value is <code>r</code></li>
+</ul>
+
+<p>The static method <code>createFromString</code> is to be use if your data is a string. This
+method takes no optional <code>$open_mode</code> parameter.</p>
+
+<h2>CSV properties settings</h2>
+
+<p>Once your object is created you can optionally set:</p>
+
+<ul>
+<li>the CSV delimiter;</li>
+<li>the CSV enclosure;</li>
+<li>the CSV escape characters;</li>
+<li>the object <code>SplFileObject</code> flags;</li>
+<li>the CSV encoding charset if the CSV is not in <code>UTF-8</code>;</li>
+</ul>
+
+<pre><code class="language-php">$reader = new Reader('/path/to/your/csv/file.csv');
+
+$reader-&gt;setDelimeter(',');
+$reader-&gt;setEnclosure('"');
+$reader-&gt;setEscape('\\');
+$reader-&gt;setFlags(SplFileObject::READ_AHEAD|SplFileObject::SKIP_EMPTY);
+$reader-&gt;setEncoding('iso-8859-1');
+</code></pre>
+
+<p>If you are no sure about the delimiter you can ask the library to detect it for you using the <code>detectDelimiter</code> method. <strong>This method will only give you a hint</strong>.</p>
+
+<p>The method takes two arguments:</p>
+
+<ul>
+<li>the number of rows to scan (default to <code>1</code>);</li>
+<li>the possible delimiters to check (you don't need to specify the following delimiters as they are already checked by the method: <code>",", ";", "\t"</code>);</li>
+</ul>
+
+<pre><code class="language-php">$reader = new Reader('/path/to/your/csv/file.csv');
+
+$reader-&gt;setEnclosure('"');
+$reader-&gt;setEscape('\\');
+$reader-&gt;setFlags(SplFileObject::READ_AHEAD|SplFileObject::SKIP_EMPTY);
+$reader-&gt;setEncoding('iso-8859-1');
+
+$delimiter = $reader-&gt;detectDelimiter(10, [' ', '|']);
+</code></pre>
+
+<p>The more rows and delimiters you had, the more time and memory consuming the operation will be.</p>
+
+<ul>
+<li>If a single delimiter is found the method will return it;</li>
+<li>If multiple delimiters are found (ie: your CSV is not consistent) a <code>RuntimeException</code> is thrown;</li>
+<li>If no delimiter is found or your CSV is composed of a single column, <code>null</code> will be return;</li>
+</ul>
+
+<h2>Switching from one class to the other</h2>
+
+<p>It is possible to switch between modes by using:</p>
+
+<ul>
+<li>the <code>League\Csv\Writer::getReader</code> method from the <code>League\Csv\Writer</code> class</li>
+<li>the <code>League\Csv\Reader::getWriter</code> method from the <code>League\Csv\Reader</code> class this method accept the optional $open_mode parameter.</li>
+</ul>
+
+<pre><code class="language-php">$reader = $writer-&gt;getReader();
+$newWriter = $reader-&gt;getWriter('a'); 
+</code></pre>
+
+<div class="message-warning"><strong>Warning:</strong> be careful the <code>$newWriter</code>
+object is not equal to the <code>$writer</code> object!</div>
+    </article>
+</main>
+
+<footer>
+    <span>&copy; Copyright The League of Extraordinary Packages.</span>
+    <span>Site design by <a href="http://reinink.ca">Jonathan Reinink</a>.</span>
+    <span>Powered by <a href="https://sculpin.io">Sculpin</a>.</span>
+</footer>
+
+<script src="//ajax.googleapis.com/ajax/libs/jquery/1.10.2/jquery.min.js"></script>
+<script src="/themes/thephpleague/thephpleague.github.com/js/scripts.js"></script>
+<script src="/themes/thephpleague/thephpleague.github.com/js/prism.js"></script>
+
+    <script>
+        (function(b,o,i,l,e,r){b.GoogleAnalyticsObject=l;b[l]||(b[l]=
+        function(){(b[l].q=b[l].q||[]).push(arguments)});b[l].l=+new Date;
+        e=o.createElement(i);r=o.getElementsByTagName(i)[0];
+        e.src='//www.google-analytics.com/analytics.js';
+        r.parentNode.insertBefore(e,r)}(window,document,'script','ga'));
+        ga('create','UA-46050814-6');ga('send','pageview');
+    </script>
+
+</body>
+</html>

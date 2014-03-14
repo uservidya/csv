@@ -1,0 +1,190 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+            <link rel="icon" type="image/x-icon" href="/themes/thephpleague/thephpleague.github.com/img/favicon.ico" />
+                <link rel="apple-touch-icon-precomposed" href="/themes/thephpleague/thephpleague.github.com/img/apple-touch-icon-precomposed.png">
+                <title>Examples - CSV</title>
+                <meta name="description" content="Working with CSV can often be much more difficult than you expect, with different types of delimiter and complicated structures. This makes it easy to read and write almost anything.">
+                <link rel="stylesheet" href="/themes/thephpleague/thephpleague.github.com/css/all.css">
+    </head>
+<body>
+
+<section class="all_packages">
+    <a href="http://thephpleague.com/">
+        <img src="/themes/thephpleague/thephpleague.github.com/img/loep_logo.png" width="195" height="200" alt="The League of Extraordinary Packages">
+    </a>
+    <h2>Our Packages:</h2>
+    <ul>
+    </ul>
+</section>
+
+<header>
+    <a class="logo" href="/">
+                <span class="name">CSV</span>
+        <span class="tagline">CSV data manipulation made easy in PHP.</span>
+    </a>
+    <a href="http://thephpleague.com/" class="league">
+        Presented by The League of Extraordinary Packages
+    </a>
+</header>
+
+<input type="checkbox" id="menu">
+<label for="menu" onclick>
+    <div class="closed">&#9776; Menu</div>
+    <div class="open">&#9776; Hide Menu</div>
+</label>
+
+<main>
+    <menu>
+                    <h2>Getting Started</h2>
+            <ul>
+                                    <li >
+                        <a href="/">Introduction</a>
+                    </li>
+                                    <li class="selected">
+                        <a href="/examples/">Examples</a>
+                    </li>
+                                    <li >
+                        <a href="/installation/">Installation</a>
+                    </li>
+                            </ul>
+                    <h2>The API</h2>
+            <ul>
+                                    <li >
+                        <a href="/overview/">Overview</a>
+                    </li>
+                                    <li >
+                        <a href="/outputting/">Outputting</a>
+                    </li>
+                                    <li >
+                        <a href="/reading/">Extracting</a>
+                    </li>
+                                    <li >
+                        <a href="/inserting/">Inserting</a>
+                    </li>
+                            </ul>
+            </menu>
+    <article>
+        <h1>Examples</h1>
+
+<h2>Parsing a document</h2>
+
+<p>A simple example to show you how to parse a CSV document.</p>
+
+<pre><code class="language-php">&lt;?php
+use League\Csv;
+
+$csv = new Reader('/path/to/your/csv/file.csv');
+
+//get the first row, usually the CSV header
+$headers = $csv-&gt;fetchOne();
+
+//get 25 rows starting from the 11th row
+$res = $csv-&gt;setOffset(10)-&gt;setLimit(25)-&gt;fetchAll();
+</code></pre>
+
+<h2>Creating a CSV document</h2>
+
+<p>A simple example to show you how to create and download a CSV from a <code>PDOStatement</code> object</p>
+
+<pre><code class="language-php">&lt;?php
+use League\Csv;
+
+//we fetch the info from a DB using a PDO object
+$sth = $dbh-&gt;prepare(
+    "SELECT firstname, lastname, email FROM users LIMIT 200"
+);
+//because we don't want to duplicate the data for each row 
+// PDO::FETCH_NUM could also have been used
+$sth-&gt;setFetchMode(PDO::FETCH_ASSOC);
+$sth-&gt;execute();
+
+//we create the CSV into memory
+$csv = new Writer(new SplTempFileObject);
+
+//we insert the CSV header
+$csv-&gt;insertOne(['firstname', 'lastname', 'email']);
+
+// The PDOStatement Object implements the Traversable Interface
+// that's why Writer::insertAll can directly insert
+// the data into the CSV
+$csv-&gt;insertAll($sth);
+
+// Because you are providing the filename you don't have to 
+// set the HTTP headers Writer::output can 
+// directly set them for you
+// The file is downloadable
+$csv-&gt;output('users.csv');
+die;
+</code></pre>
+
+<h2>Importing a CSV into a Database</h2>
+
+<p>A simple example to show you how to import some CSV data into a database using a <code>PDOStatement</code> object</p>
+
+<pre><code class="language-php">&lt;?php
+use League\Csv;
+
+//We are going to insert some data into the users table
+$sth = $dbh-&gt;prepare(
+    "INSERT INTO users (firstname, lastname, email) VALUES (:firstname, :lastname, :email)"
+);
+
+$csv = new Reader('/path/to/your/csv/file.csv');
+$csv-&gt;setOffset(1); //because we don't want to insert the header
+$nbInsert = $csv-&gt;each(function ($row) use (&amp;$sth)) {
+    //Do not forget to validate your data before inserting it in your database
+    $sth-&gt;bindValue(':firstname', $row[0], PDO::PARAM_STR);
+    $sth-&gt;bindValue(':lastname', $row[1], PDO::PARAM_STR);
+    $sth-&gt;bindValue(':email', $row[2], PDO::PARAM_STR);
+
+    return $sth-&gt;execute(); //if the function return false then the iteration will stop
+});
+</code></pre>
+
+<h2>More Examples</h2>
+
+<ul>
+<li><a href="https://github.com/thephpleague/csv/blob/master/examples/extract.php">Selecting specific rows in the CSV</a></li>
+<li><a href="https://github.com/thephpleague/csv/blob/master/examples/filtering.php">Filtering a CSV</a></li>
+<li><a href="https://github.com/thephpleague/csv/blob/master/examples/writing.php">Creating a CSV</a></li>
+<li><a href="https://github.com/thephpleague/csv/blob/master/examples/merge.php">Merging 2 CSV documents</a></li>
+<li><a href="https://github.com/thephpleague/csv/blob/master/examples/switchmode.php">Switching between modes from Writer to Reader mode</a></li>
+<li><a href="https://github.com/thephpleague/csv/blob/master/examples/download.php">Downloading the CSV</a></li>
+<li><a href="https://github.com/thephpleague/csv/blob/master/examples/json.php">Converting the CSV into a Json String</a></li>
+<li><a href="https://github.com/thephpleague/csv/blob/master/examples/xml.php">Converting the CSV into a XML file</a></li>
+<li><a href="https://github.com/thephpleague/csv/blob/master/examples/table.php">Converting the CSV into a HTML Table</a></li>
+</ul>
+
+<blockquote>
+  <p>The CSV data use for the examples are taken from <a href="http://opendata.paris.fr/opendata/jsp/site/Portal.jsp?document_id=60&amp;portlet_id=121">Paris Opendata</a></p>
+</blockquote>
+
+<p>Learn more about how this all works in the <a href="/overview">Overview</a>.</p>
+    </article>
+</main>
+
+<footer>
+    <span>&copy; Copyright The League of Extraordinary Packages.</span>
+    <span>Site design by <a href="http://reinink.ca">Jonathan Reinink</a>.</span>
+    <span>Powered by <a href="https://sculpin.io">Sculpin</a>.</span>
+</footer>
+
+<script src="//ajax.googleapis.com/ajax/libs/jquery/1.10.2/jquery.min.js"></script>
+<script src="/themes/thephpleague/thephpleague.github.com/js/scripts.js"></script>
+<script src="/themes/thephpleague/thephpleague.github.com/js/prism.js"></script>
+
+    <script>
+        (function(b,o,i,l,e,r){b.GoogleAnalyticsObject=l;b[l]||(b[l]=
+        function(){(b[l].q=b[l].q||[]).push(arguments)});b[l].l=+new Date;
+        e=o.createElement(i);r=o.getElementsByTagName(i)[0];
+        e.src='//www.google-analytics.com/analytics.js';
+        r.parentNode.insertBefore(e,r)}(window,document,'script','ga'));
+        ga('create','UA-46050814-6');ga('send','pageview');
+    </script>
+
+</body>
+</html>

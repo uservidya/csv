@@ -1,0 +1,144 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+            <link rel="icon" type="image/x-icon" href="/themes/thephpleague/thephpleague.github.com/img/favicon.ico" />
+                <link rel="apple-touch-icon-precomposed" href="/themes/thephpleague/thephpleague.github.com/img/apple-touch-icon-precomposed.png">
+                <title>Reading &amp; Filtering - CSV</title>
+                <meta name="description" content="Working with CSV can often be much more difficult than you expect, with different types of delimiter and complicated structures. This makes it easy to read and write almost anything.">
+                <link rel="stylesheet" href="/themes/thephpleague/thephpleague.github.com/css/all.css">
+    </head>
+<body>
+
+<section class="all_packages">
+    <a href="http://thephpleague.com/">
+        <img src="/themes/thephpleague/thephpleague.github.com/img/loep_logo.png" width="195" height="200" alt="The League of Extraordinary Packages">
+    </a>
+    <h2>Our Packages:</h2>
+    <ul>
+    </ul>
+</section>
+
+<header>
+    <a class="logo" href="/">
+                <span class="name">CSV</span>
+        <span class="tagline">CSV data manipulation made easy in PHP.</span>
+    </a>
+    <a href="http://thephpleague.com/" class="league">
+        Presented by The League of Extraordinary Packages
+    </a>
+</header>
+
+<input type="checkbox" id="menu">
+<label for="menu" onclick>
+    <div class="closed">&#9776; Menu</div>
+    <div class="open">&#9776; Hide Menu</div>
+</label>
+
+<main>
+    <menu>
+                    <h2>Getting Started</h2>
+            <ul>
+                                    <li >
+                        <a href="/">Introduction</a>
+                    </li>
+                                    <li >
+                        <a href="/examples/">Examples</a>
+                    </li>
+                                    <li >
+                        <a href="/installation/">Installation</a>
+                    </li>
+                            </ul>
+                    <h2>The API</h2>
+            <ul>
+                                    <li >
+                        <a href="/overview/">Overview</a>
+                    </li>
+                                    <li >
+                        <a href="/outputting/">Outputting</a>
+                    </li>
+                                    <li >
+                        <a href="/reading/">Extracting</a>
+                    </li>
+                                    <li class="selected">
+                        <a href="/inserting/">Inserting</a>
+                    </li>
+                            </ul>
+            </menu>
+    <article>
+        <h1>Inserting Data</h1>
+
+<p>To create or update a CSV use the following <code>League\Csv\Writer</code> methods.</p>
+
+<p class="message-warning">When inserting strings don't forget to specify the CSV delimiter and enclosure characters that match those use in the string.</p>
+
+<p class="message-info">When creating a file using the library, first insert all the data that need to be inserted before starting manipulating the CSV. If you manipulate your data before insertion, you may change the file cursor position and get unexpected results.</p>
+
+<h2>insertOne</h2>
+
+<p><code>insertOne</code> inserts a single row. This method can take an <code>array</code>, a <code>string</code> or
+an <code>object</code> implementing the <code>__toString</code> method.</p>
+
+<pre><code class="language-php">class ToStringEnabledClass
+{
+    private $str;
+
+    public function __construct($str)
+    {
+        $this-&gt;str = $str;
+    }
+
+    public function __toString()
+    {
+        return $this-&gt;str;
+    }
+}
+
+$writer-&gt;insertOne(['john', 'doe', 'john.doe@example.com']);
+$writer-&gt;insertOne("'john','doe','john.doe@example.com'"); 
+$writer-&gt;insertOne(new ToStringEnabledClass("john,doe,john.doe@example.com")) 
+</code></pre>
+
+<h2>insertAll</h2>
+
+<p><code>insertAll</code> inserts multiple rows. This method can take an <code>array</code> or a 
+<code>Traversable</code> object to add several rows to the CSV data.</p>
+
+<pre><code class="language-php">$arr = [
+    [1, 2, 3],
+    ['foo', 'bar', 'baz'],
+    "'john','doe','john.doe@example.com'",
+    new ToStringEnabledClass("john,doe,john.doe@example.com")
+];
+
+$writer-&gt;insertAll($arr); //using an array 
+
+$object = new ArrayIterator($arr);
+$writer-&gt;insertAll($object); //using a Traversable object
+</code></pre>
+    </article>
+</main>
+
+<footer>
+    <span>&copy; Copyright The League of Extraordinary Packages.</span>
+    <span>Site design by <a href="http://reinink.ca">Jonathan Reinink</a>.</span>
+    <span>Powered by <a href="https://sculpin.io">Sculpin</a>.</span>
+</footer>
+
+<script src="//ajax.googleapis.com/ajax/libs/jquery/1.10.2/jquery.min.js"></script>
+<script src="/themes/thephpleague/thephpleague.github.com/js/scripts.js"></script>
+<script src="/themes/thephpleague/thephpleague.github.com/js/prism.js"></script>
+
+    <script>
+        (function(b,o,i,l,e,r){b.GoogleAnalyticsObject=l;b[l]||(b[l]=
+        function(){(b[l].q=b[l].q||[]).push(arguments)});b[l].l=+new Date;
+        e=o.createElement(i);r=o.getElementsByTagName(i)[0];
+        e.src='//www.google-analytics.com/analytics.js';
+        r.parentNode.insertBefore(e,r)}(window,document,'script','ga'));
+        ga('create','UA-46050814-6');ga('send','pageview');
+    </script>
+
+</body>
+</html>

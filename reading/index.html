@@ -1,0 +1,313 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+            <link rel="icon" type="image/x-icon" href="/themes/thephpleague/thephpleague.github.com/img/favicon.ico" />
+                <link rel="apple-touch-icon-precomposed" href="/themes/thephpleague/thephpleague.github.com/img/apple-touch-icon-precomposed.png">
+                <title>Extracting - CSV</title>
+                <meta name="description" content="Working with CSV can often be much more difficult than you expect, with different types of delimiter and complicated structures. This makes it easy to read and write almost anything.">
+                <link rel="stylesheet" href="/themes/thephpleague/thephpleague.github.com/css/all.css">
+    </head>
+<body>
+
+<section class="all_packages">
+    <a href="http://thephpleague.com/">
+        <img src="/themes/thephpleague/thephpleague.github.com/img/loep_logo.png" width="195" height="200" alt="The League of Extraordinary Packages">
+    </a>
+    <h2>Our Packages:</h2>
+    <ul>
+    </ul>
+</section>
+
+<header>
+    <a class="logo" href="/">
+                <span class="name">CSV</span>
+        <span class="tagline">CSV data manipulation made easy in PHP.</span>
+    </a>
+    <a href="http://thephpleague.com/" class="league">
+        Presented by The League of Extraordinary Packages
+    </a>
+</header>
+
+<input type="checkbox" id="menu">
+<label for="menu" onclick>
+    <div class="closed">&#9776; Menu</div>
+    <div class="open">&#9776; Hide Menu</div>
+</label>
+
+<main>
+    <menu>
+                    <h2>Getting Started</h2>
+            <ul>
+                                    <li >
+                        <a href="/">Introduction</a>
+                    </li>
+                                    <li >
+                        <a href="/examples/">Examples</a>
+                    </li>
+                                    <li >
+                        <a href="/installation/">Installation</a>
+                    </li>
+                            </ul>
+                    <h2>The API</h2>
+            <ul>
+                                    <li >
+                        <a href="/overview/">Overview</a>
+                    </li>
+                                    <li >
+                        <a href="/outputting/">Outputting</a>
+                    </li>
+                                    <li class="selected">
+                        <a href="/reading/">Extracting</a>
+                    </li>
+                                    <li >
+                        <a href="/inserting/">Inserting</a>
+                    </li>
+                            </ul>
+            </menu>
+    <article>
+        <h1>Extracting data</h1>
+
+<p>To extract data use <code>League\Csv\Reader</code> methods.</p>
+
+<h2>Fetching CSV data</h2>
+
+<h3>query($callable = null)</h3>
+
+<p>The <code>query</code> method prepares and issues queries on the CSV data. It returns an <code>Iterator</code> that represents the result that you can further manipulate as you wish.</p>
+
+<pre><code class="language-php">$data = $reader-&gt;query();
+foreach ($data as $line_index =&gt; $row) {
+    //do something here
+}
+</code></pre>
+
+<h3>fetchAll($callable = null)</h3>
+
+<p><code>fetchAll</code> returns a sequential array of all rows.</p>
+
+<pre><code class="language-php">$data = $reader-&gt;fetchAll();
+// will return something like this :
+// 
+// [ 
+//   ['john', 'doe', 'john.doe@example.com'],
+//   ['jane', 'doe', 'jane.doe@example.com'],
+//   ...
+// ]
+//
+$nb_rows = count($data);
+</code></pre>
+
+<h3>fetchAssoc([], $callable = null)</h3>
+
+<p><code>fetchAssoc</code> returns a sequential array of all rows. The rows themselves are associative arrays where the keys are given directly to the method using an one dimension array. This array should only contain unique <code>string</code> and/or <code>integer</code> values.</p>
+
+<pre><code class="language-php">$data = $reader-&gt;fetchAssoc(['firstname', 'lastname', 'email']);
+// will return something like this :
+// 
+// [ 
+//   ['firstname' =&gt; 'john', 'lastname' =&gt; 'doe', 'email' =&gt; 'john.doe@example.com'],
+//   ['firstname' =&gt; 'jane', 'lastname' =&gt; 'doe', 'email' =&gt; 'jane.doe@example.com'],
+//   ...
+// ]
+// 
+</code></pre>
+
+<p>If the number of values in a CSV row is lesser than the number of named keys, the method will add <code>null</code> values to compensate for the missing values.</p>
+
+<p>If the number of values in a CSV row is greater that the number of named keys the exceeding values will be drop from the result set.</p>
+
+<h3>fetchCol($columnIndex = 0, $callable = null)</h3>
+
+<p><code>fetchCol</code> returns a sequential array of all values in a given column from the CSV data.</p>
+
+<p>If no argument is given to the method it will return the first column from the CSV data.
+If the column does not exists in the csv data the method will return an array full of <code>null</code> value.</p>
+
+<pre><code class="language-php">$data = $reader-&gt;fetchCol(2);
+// will return something like this :
+// 
+// ['john.doe@example.com', 'jane.doe@example.com', ...]
+// 
+</code></pre>
+
+<p>The methods listed above (<code>query</code>, <code>fetchAll</code>, <code>fetchAssoc</code>, <code>fetchCol</code>) can all take a optional <code>callable</code> argument to further manipulate each row before being returned. This callable function can take up to three parameters:</p>
+
+<ul>
+<li>the current csv row data</li>
+<li>the current csv key</li>
+<li>the current csv iterator object</li>
+</ul>
+
+<h3>fetchOne($offset = 0)</h3>
+
+<p><code>fetchOne</code> return one single row from the CSV data. The required argument $offset represent the row index starting at 0. If no argument is given to the method it will return the first row from the CSV data.</p>
+
+<pre><code class="language-php">$data = $reader-&gt;fetchOne(3); ///accessing the 4th row (indexing starts at 0)
+// will return something like this :
+// 
+//   ['john', 'doe', 'john.doe@example.com']
+//
+</code></pre>
+
+<h3>each($callable)</h3>
+
+<p><code>each</code> apply a callable function on each CSV row. The callable function:</p>
+
+<ul>
+<li><strong>must</strong> return true to continue iterating over the CSV;</li>
+<li>can take up to tree parameters:
+
+<ul>
+<li>the current csv row data;</li>
+<li>the current csv key;</li>
+<li>the current csv iterator object;</li>
+</ul></li>
+</ul>
+
+<p>The method returns the number of successful iterations.</p>
+
+<pre><code class="language-php">&lt;?php
+//re-create the fetchAll method using the each method
+$res = [];
+$nbIteration = $reader-&gt;each(function ($row, $index, $iterator) use (&amp;$res, $func)) {
+    $res[] = $func($row, $index, $iterator);
+    return true;
+});
+</code></pre>
+
+<h2>Querying CSV data</h2>
+
+<p>You can restrict CSV extract methods output by setting query options. To set those options you will need to use the methods described below. But keep in mind that:</p>
+
+<ul>
+<li>The query options methods are all chainable <em>except when they have to return a boolean</em>;</li>
+<li>The query options methods can be call in any sort of order before any extract method;</li>
+<li>After an extract method call, all query options are cleared;</li>
+<li>The optional extract method callable function is called after all query options have been applied;</li>
+</ul>
+
+<h2>Filtering methods</h2>
+
+<p>The filtering options <strong>are the first settings applied to the CSV before anything else</strong>. The filters follow the <em>First In First Out</em> rule.</p>
+
+<h3>addFilter($callable)</h3>
+
+<p>The <code>addFilter</code> method adds a callable filter function each time it is called. The function can take up to three parameters:</p>
+
+<ul>
+<li>the current csv row data;</li>
+<li>the current csv key;</li>
+<li>the current csv iterator object;</li>
+</ul>
+
+<p class="message-warning">The <code>setFilter</code> method has been deprecated and will be remove in the next major version release. For backward compatibility, the method is now an alias of the <code>addFilter</code> method.</p>
+
+<h3>removeFilter($callable)</h3>
+
+<p><code>removeFilter</code> method removes an already registered filter function. If the function was registered multiple times, you will have to call <code>removeFilter</code> as often as the filter was registered. <strong>The first registered copy will be the first to be removed.</strong></p>
+
+<h3>hasFilter($callable)</h3>
+
+<p><code>hasFilter</code> method checks if the filter function is already registered</p>
+
+<h3>clearFilter()</h3>
+
+<p><code>clearFilter</code> method removes all registered filter functions.</p>
+
+<h2>Sorting methods</h2>
+
+<p>The sorting options are applied <strong>after the CSV filtering options</strong>. The sorting follow the <em>First In First Out</em> rule.</p>
+
+<p class="message-warning">To sort the data <code>iterator_to_array</code> is used which could lead to performance penalty if you have a heavy CSV file to sort
+</p>
+
+<h3>addSortBy($callable)</h3>
+
+<p><code>addSortBy</code> method adds a sorting function each time it is called. The function takes exactly two parameters which will be filled by pairs of rows.</p>
+
+<p class="message-warning">The <code>setSortBy</code> method has been deprecated and will be remove in the next major version release. For backward compatibility, the method is now an alias of the <code>addSortBy</code> method.</p>
+
+<h3>removeSortBy($callable)</h3>
+
+<p><code>removeSortBy</code> method removes an already registered sorting function. If the function was registered multiple times, you will have to call <code>removeSortBy</code> as often as the function was registered. <strong>The first registered copy will be the first to be removed.</strong></p>
+
+<h3>hasSortBy($callable)</h3>
+
+<p><code>hasSortBy</code> method checks if the sorting function is already registered</p>
+
+<h3>clearSortBy()</h3>
+
+<p><code>clearSortBy</code> method removes all registered sorting functions.</p>
+
+<h2>Interval methods</h2>
+
+<p>The methods enable returning a specific interval of CSV rows. When called more than once, only the last filtering settings is taken into account. The interval is calculated <strong>after filtering and/or sorting but before extracting the data</strong>.</p>
+
+<h3>setOffset($offset = 0)</h3>
+
+<p><code>setOffset</code> method specifies an optional offset for the return data. By default the offset equals <code>0</code>.</p>
+
+<h3>setLimit($limit = -1)</h3>
+
+<p><code>setLimit</code> method specifies an optional maximum rows count for the return data. By default the offset equals <code>-1</code>, which translate to all rows.</p>
+
+<p class="message-warning">Both methods have no effect on the `fetchOne` method output.</p>
+
+<h2>A concrete example</h2>
+
+<p>Here's an example on how to use the query features of the <code>Reader</code> class to restrict the <code>fetchAssoc</code> result:</p>
+
+<pre><code class="language-php">function filterByEmail($row) 
+{
+    return filer_var($row[2], FILTER_VALIDATE_EMAIL);
+}
+
+function sortByLastName($rowA, $rowB)
+{
+    return strcmp($rowB[1], $rowA[1]);
+}
+
+$data = $reader
+    -&gt;setOffset(3)
+    -&gt;setLimit(2)
+    -&gt;addFilter('filterByEmail')
+    -&gt;addSortBy('sortByLastName')
+    -&gt;fetchAssoc(['firstname', 'lastname', 'email'], function ($value) {
+    return array_map('strtoupper', $value);
+});
+// data length will be equals or lesser that 2 starting from the row index 3.
+// will return something like this :
+// 
+// [ 
+//   ['firstname' =&gt; 'JANE', 'lastname' =&gt; 'RAMANOV', 'email' =&gt; 'JANE.RAMANOV@EXAMPLE.COM'],
+//   ['firstname' =&gt; 'JOHN', 'lastname' =&gt; 'DOE', 'email' =&gt; 'JOHN.DOE@EXAMPLE.COM'],
+// ]
+// 
+</code></pre>
+    </article>
+</main>
+
+<footer>
+    <span>&copy; Copyright The League of Extraordinary Packages.</span>
+    <span>Site design by <a href="http://reinink.ca">Jonathan Reinink</a>.</span>
+    <span>Powered by <a href="https://sculpin.io">Sculpin</a>.</span>
+</footer>
+
+<script src="//ajax.googleapis.com/ajax/libs/jquery/1.10.2/jquery.min.js"></script>
+<script src="/themes/thephpleague/thephpleague.github.com/js/scripts.js"></script>
+<script src="/themes/thephpleague/thephpleague.github.com/js/prism.js"></script>
+
+    <script>
+        (function(b,o,i,l,e,r){b.GoogleAnalyticsObject=l;b[l]||(b[l]=
+        function(){(b[l].q=b[l].q||[]).push(arguments)});b[l].l=+new Date;
+        e=o.createElement(i);r=o.getElementsByTagName(i)[0];
+        e.src='//www.google-analytics.com/analytics.js';
+        r.parentNode.insertBefore(e,r)}(window,document,'script','ga'));
+        ga('create','UA-46050814-6');ga('send','pageview');
+    </script>
+
+</body>
+</html>
